@@ -119,8 +119,8 @@ System.NotImplementedException: System.Transactions.TransactionInterop.GetExport
 | Service | Fixed? |
 |---------|--------|
 | Center.Service | ✅ Fixed in `016fff7` |
-| Fighting.Service | ❌ Still uses backslash (`Languages\Language-vn.txt`) |
-| Road.Service | ❌ Still uses backslash (`Languages\Language-vn.txt`) |
+| Fighting.Service | ✅ Fixed |
+| Road.Service | ✅ Fixed |
 
 ---
 
