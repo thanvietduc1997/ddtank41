@@ -132,11 +132,8 @@ curl -s -X POST 'http://127.0.0.1:2008/CenterService/' \
 
 ## Known Issues on macOS (Non-Blocking)
 
-### 1. `ColoredConsoleAppender` fails (log4net)
-```
-System.EntryPointNotFoundException: GetConsoleOutputCP
-```
-`GetConsoleOutputCP` is a Windows-only console API. The colored console appender is skipped; the two file appenders (`GameServer.log`, `Error.log`) work normally. No action needed.
+### 1. ~~`ColoredConsoleAppender` fails (log4net)~~ (Fixed)
+**Fixed** by switching `Center.Service/logconfig.xml` appender type from `log4net.Appender.ColoredConsoleAppender` to `log4net.Appender.ConsoleAppender`. `GetConsoleOutputCP` is a Windows-only Win32 API; the plain appender avoids it and produces uncolored console output on macOS.
 
 ### 2. ~~`System.Transactions.TransactionInterop` — NotImplementedException~~ (Fixed)
 **Fixed** by adding `Enlist=False` to both connection strings in the deployed config (`Center.Service.exe.config`). Mono's `SqlClient` auto-enlists connections into ambient transactions, which triggers unimplemented MSDTC code paths. `Enlist=False` disables auto-enlistment; there are no `TransactionScope` usages in the codebase so there is no functional cost.
