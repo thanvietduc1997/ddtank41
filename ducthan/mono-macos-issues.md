@@ -132,9 +132,25 @@ System.NotImplementedException: System.Transactions.TransactionInterop.GetExport
 - **Center.Service as server:** exposes a `netTcpBinding` listener on port 2009 — it never binds. The `basicHttpBinding` on port 2008 still works.
 - **Road.Service as client:** `App.config` has a WCF client endpoint pointing at `net.tcp://127.0.0.1:2009/` (Center.Service). This connection will always fail on Mono.
 
-**Workaround:** Road.Service (and any other client) must be updated to use the `basicHttpBinding` endpoint (`http://127.0.0.1:2008/CenterService/`) instead of the `net.tcp://` endpoint.
+**Fix:** In each WCF client's config, remove the `<netTcpBinding>` binding section and replace the client endpoint:
+```xml
+<!-- BEFORE -->
+<endpoint address="net.tcp://127.0.0.1:2009/" binding="netTcpBinding"
+          bindingConfiguration="NetTcpBinding_ICenterService"
+          contract="CenterService.ICenterService" name="NetTcpBinding_ICenterService" />
 
-**Status:** ❌ Not yet fixed in any service. Requires both config and potentially code changes on the WCF client side.
+<!-- AFTER -->
+<endpoint address="http://127.0.0.1:2008/CenterService/" binding="basicHttpBinding"
+          contract="CenterService.ICenterService" name="NetTcpBinding_ICenterService" />
+```
+The endpoint `name` attribute is kept unchanged so no C# code changes are needed. Center.Service/App.config is left with both endpoints to preserve Windows compatibility (net.tcp silently does not bind on Mono but does not crash the host).
+
+**Status by service:**
+| Service | Fixed? |
+|---------|--------|
+| Center.Service (server) | ✅ No change needed — basicHttpBinding on port 2008 already works |
+| Road.Service (client) | ✅ Fixed |
+| Tank.Request (client) | ✅ Fixed |
 
 ---
 
