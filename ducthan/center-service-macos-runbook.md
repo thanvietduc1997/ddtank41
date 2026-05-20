@@ -1,6 +1,6 @@
 # Center.Service — macOS Build & Run Runbook
 
-**Last verified:** 2026-05-19  
+**Last verified:** 2026-05-19 (updated: Enlist=False fix applied)  
 **Environment:** macOS (arm64), .NET SDK 10.0.107, Mono 6.14.1
 
 ---
@@ -15,7 +15,7 @@
 | WCF HTTP endpoint port 2008 | ✅ Responds |
 | WCF netTcpBinding port 2009 | ❌ Not supported by Mono 6.x |
 | DB connectivity (Player34, Game34) | ✅ Queries execute |
-| Background timers (some) | ⚠️ `System.Transactions.TransactionInterop` unimplemented in Mono — non-fatal |
+| Background timers (all) | ✅ All timers run cleanly (fixed with `Enlist=False` in connection strings) |
 
 ---
 
@@ -60,43 +60,6 @@ dotnet build Center.Service/Center.Service.csproj
 ```
 
 Output lands in: `Center.Service/bin/Debug/net48/`
-
----
-
-## One-Time Config Patch
-
-The deployed config file is `Center.Service/bin/Debug/net48/Center.Service.exe.config`.  
-Two things must be patched before first run:
-
-**1. Connection strings** — change from the original Windows SQL Express to Docker:
-
-```xml
-<!-- BEFORE -->
-<add key="conString" value="Data Source=KHANHDUY\SQLEXPRESS;Initial Catalog=Project_Player34;..." />
-<add key="crosszoneString" value="Data Source=KHANHDUY\SQLEXPRESS;Initial Catalog=Project_Game34;..." />
-
-<!-- AFTER -->
-<add key="conString"
-     value="Data Source=localhost,1433;Initial Catalog=Player34;Persist Security Info=True;
-            User ID=sa;Password=DDTank41@Strong;TrustServerCertificate=True" />
-<add key="crosszoneString"
-     value="Data Source=localhost,1433;Initial Catalog=Game34;Persist Security Info=True;
-            User ID=sa;Password=DDTank41@Strong;TrustServerCertificate=True" />
-```
-
-**2. Path separators** — change backslash to forward slash for the language files:
-
-```xml
-<!-- BEFORE -->
-<add key="LanguagePath" value="Languages\Language-vn.txt" />
-<add key="SystemNoticePath" value="Languages\SystemNotice.xml" />
-
-<!-- AFTER -->
-<add key="LanguagePath" value="Languages/Language-vn.txt" />
-<add key="SystemNoticePath" value="Languages/SystemNotice.xml" />
-```
-
-These changes are already applied to the current build output.
 
 ---
 
@@ -175,8 +138,8 @@ System.EntryPointNotFoundException: GetConsoleOutputCP
 ```
 `GetConsoleOutputCP` is a Windows-only console API. The colored console appender is skipped; the two file appenders (`GameServer.log`, `Error.log`) work normally. No action needed.
 
-### 2. `System.Transactions.TransactionInterop.GetExportCookie` — NotImplementedException
-Some background timer callbacks use `TransactionScope` for distributed transaction enlistment, which Mono 6.x does not implement. These errors appear in `Error.log` from background threads. They are non-fatal — the server continues running and the affected timers log the error and skip that cycle.
+### 2. ~~`System.Transactions.TransactionInterop` — NotImplementedException~~ (Fixed)
+**Fixed** by adding `Enlist=False` to both connection strings in the deployed config (`Center.Service.exe.config`). Mono's `SqlClient` auto-enlists connections into ambient transactions, which triggers unimplemented MSDTC code paths. `Enlist=False` disables auto-enlistment; there are no `TransactionScope` usages in the codebase so there is no functional cost.
 
 ### 3. WCF `netTcpBinding` (port 2009) not listening
 Mono's WCF implementation does not fully support `net.tcp://` transport on macOS. The `basicHttpBinding` endpoint on port 2008 is available as a functional alternative for all WCF callers. If netTcp callers need to be supported, the service would need to run on Windows.
