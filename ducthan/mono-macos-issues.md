@@ -46,8 +46,8 @@ Also remove all `<mapping>` children (color level mappings — ignored by `Conso
 | Service | Fixed? |
 |---------|--------|
 | Center.Service | ✅ Fixed in `a8ed932` |
-| Fighting.Service | ❌ Still has `ColoredConsoleAppender` |
-| Road.Service | ❌ Still has `ColoredConsoleAppender` |
+| Fighting.Service | ✅ Fixed |
+| Road.Service | ✅ Fixed |
 
 ---
 
