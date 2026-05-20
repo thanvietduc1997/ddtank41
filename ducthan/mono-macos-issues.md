@@ -74,8 +74,8 @@ System.NotImplementedException: System.Transactions.TransactionInterop.GetExport
 | Service | Fixed? |
 |---------|--------|
 | Center.Service | ✅ Fixed in `016fff7` |
-| Fighting.Service | ❌ Connection strings still point at `KHANHDUY\SQLEXPRESS`, no `Enlist=False` |
-| Road.Service | ❌ Connection strings still point at `KHANHDUY\SQLEXPRESS`, no `Enlist=False` |
+| Fighting.Service | ✅ Fixed |
+| Road.Service | ✅ Fixed |
 
 ---
 
