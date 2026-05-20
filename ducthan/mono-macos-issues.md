@@ -95,8 +95,8 @@ System.NotImplementedException: System.Transactions.TransactionInterop.GetExport
 | Service | Fixed? |
 |---------|--------|
 | Center.Service | ✅ Fixed in `4db621b` |
-| Fighting.Service | ❌ Still `immediateFlush value="false"` |
-| Road.Service | ❌ Still `immediateFlush value="false"` |
+| Fighting.Service | ✅ Fixed |
+| Road.Service | ✅ Fixed |
 
 ---
 
